@@ -1,0 +1,56 @@
+# MAMS-Simulation-Toolkit
+
+This repository provides a fully annotated and optimized R implementation for simulating **Multi-Arm Multi-Stage (MAMS)** clinical trial designs.  
+The code supports flexible specification of sample sizes, stopping boundaries, and early adaptation strategies.  
+
+The functions are designed to be computationally efficient and easily extensible for research or teaching in adaptive design methodology.
+
+---
+
+## 🚀 Features
+
+- **Efficient simulation engine** — vectorized computation without unnecessary model fitting.
+- **Multi-arm multi-stage support** — arbitrary number of arms and stages.
+- **Flexible stopping rules** — futility, efficacy, or global trial stop upon success.
+- **Fully documented** — clear, English-only comments explaining each step.
+- **Publication-ready** — suitable for method sections, appendices, or reproducible research repositories.
+
+---
+
+## 📘 Included functions
+
+| Function | Description |
+|-----------|-------------|
+| `MAMS_SIM()` | Performs one simulation run of a multi-arm multi-stage design. Returns full trial-level results and adaptation matrices. |
+| `MAMS_SIM_RES()` | Runs multiple replications of `MAMS_SIM()` and summarises key outcomes (e.g. decision frequencies, expected sample size). |
+
+---
+
+## ⚙️ Example Usage
+
+```r
+# Example for a 2-stage, 1-arm design
+library(MAMS)
+
+a <- mams(
+  K = 1, J = 2, alpha = 0.025, power = 0.85,
+  r = 1:2, r0 = 1:2,
+  p  = pnorm(0.65 / (1.2 * sqrt(2))),
+  p0 = pnorm(0.25 / (1.2 * sqrt(2))),
+  ushape = "fixed", ufix = 10,
+  lshape = "fixed", lfix = 0.93
+)
+
+res <- MAMS_SIM_RES(
+  arm = 1,
+  stage_num = 2,
+  cum_sam = a$n * a$rMat[1, ],
+  ratio = 1,
+  delta1 = c(0.45, 0),
+  sd = 1.2,
+  futi_bound = a$l,
+  eff_bound = a$u,
+  nsim = 10000
+)
+
+print(res$final_res)
